@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+/// A person who can sign in, invite others, and place simulated orders.
+/// referredById is the direct referrer only. Commission never walks further up.
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(USER)
+  referralCode String   @unique
+  referredById String?
+  referredBy   User?    @relation("UserReferrals", fields: [referredById], references: [id], onDelete: Restrict)
+  referrals    User[]   @relation("UserReferrals")
+  orders       Order[]  @relation("UserOrders")
+  commissionsEarned Commission[] @relation("AffiliateCommissions")
+  commissionsAsBuyer Commission[] @relation("BuyerCommissions")
+  createdAt    DateTime @default(now())
+
+  @@index([referredById])
+}
+
+/// A simulated purchase. There is no payment gateway.
+model Order {
+  id          String      @id @default(cuid())
+  buyerId     String
+  buyer       User        @relation("UserOrders", fields: [buyerId], references: [id], onDelete: Restrict)
+  amountCents Int
+  createdAt   DateTime    @default(now())
+  commission  Commission?
+
+  @@index([buyerId])
+}
+
+/// One commission row per referred order. affiliateId is always the buyer's direct referrer.
+model Commission {
+  id          String   @id @default(cuid())
+  orderId     String   @unique
+  order       Order    @relation(fields: [orderId], references: [id], onDelete: Restrict)
+  affiliateId String
+  affiliate   User     @relation("AffiliateCommissions", fields: [affiliateId], references: [id], onDelete: Restrict)
+  buyerId     String
+  buyer       User     @relation("BuyerCommissions", fields: [buyerId], references: [id], onDelete: Restrict)
+  rateBps     Int
+  amountCents Int
+  createdAt   DateTime @default(now())
+
+  @@index([affiliateId])
+  @@index([buyerId])
+}
+
+/// Singleton settings row. id is always "default".
+model Setting {
+  id                String   @id @default("default")
+  commissionRateBps Int      @default(1000)
+  updatedAt         DateTime @updatedAt
+}
