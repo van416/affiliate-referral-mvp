@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+:root {
+  --paper: #f4f0e7;
+  --ink: #1b1914;
+  --muted: #6d655c;
+  --line: #e4d9c8;
+  --card: #fffdf9;
+  --accent: #0e6b5f;
+  --accent-deep: #0a4f47;
+  --accent-soft: #e6f4f1;
+}
+
+@theme inline {
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-card: var(--card);
+  --color-accent: var(--accent);
+  --color-accent-deep: var(--accent-deep);
+  --color-accent-soft: var(--accent-soft);
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at top, rgba(14, 107, 95, 0.09), transparent 52%),
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+input,
+button {
+  font: inherit;
+}
